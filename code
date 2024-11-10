@@ -1,0 +1,134 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100
+#define INF 1000000  // Represents "infinity" for unreachable cells
+
+int grid[MAX][MAX];
+int visited[MAX][MAX];
+int queue[MAX * MAX][3];  // Queue to store (row, column, distance)
+int front = 0, rear = 0;
+
+int directions[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; // up, down, left, right
+
+// Enqueue function to add cell to queue with distance
+void enqueue(int row, int col, int distance) {
+    queue[rear][0] = row;
+    queue[rear][1] = col;
+    queue[rear][2] = distance;
+    rear++;
+}
+
+// Dequeue function to remove cell from the queue
+void dequeue(int *row, int *col, int *distance) {
+    *row = queue[front][0];
+    *col = queue[front][1];
+    *distance = queue[front][2];
+    front++;
+}
+
+// BFS to find the shortest path in the grid
+int bfs(int rows, int cols, int startRow, int startCol, int destRow, int destCol) {
+    // Initialize visited array
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            visited[i][j] = 0;
+
+    // Reset queue pointers
+    front = 0;
+    rear = 0;
+
+    enqueue(startRow, startCol, 0);
+    visited[startRow][startCol] = 1;
+
+    while (front < rear) {
+        int row, col, distance;
+        dequeue(&row, &col, &distance);
+
+        // If we reach the destination, return the distance
+        if (row == destRow && col == destCol)
+            return distance;
+
+        // Explore all four directions
+        for (int i = 0; i < 4; i++) {
+            int newRow = row + directions[i][0];
+            int newCol = col + directions[i][1];
+
+            // Check boundaries and if the cell is open and not visited
+            if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols &&
+                grid[newRow][newCol] == 0 && !visited[newRow][newCol]) {
+                visited[newRow][newCol] = 1;  // Mark as visited
+                enqueue(newRow, newCol, distance + 1);  // Add to queue with incremented distance
+            }
+        }
+    }
+
+    // Return -1 if there's no path to the destination
+    return -1;
+}
+
+// Function to print the grid (for debugging or visual understanding)
+void print_grid(int rows, int cols) {
+    printf("\nGrid Representation:\n");
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            printf("%d ", grid[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+int main() {
+    int rows, cols;
+    int startRow, startCol, destRow, destCol;
+
+    // Input grid dimensions
+    printf("Enter the number of rows and columns for the grid: ");
+    if (scanf("%d %d", &rows, &cols) != 2 || rows <= 0 || cols <= 0 || rows > MAX || cols > MAX) {
+        printf("Invalid grid dimensions.\n");
+        return -1;
+    }
+
+    // Input grid values
+    printf("Enter the grid (0 for open cell, 1 for obstacle):\n");
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            if (scanf("%d", &grid[i][j]) != 1 || (grid[i][j] != 0 && grid[i][j] != 1)) {
+                printf("Invalid grid value at (%d, %d).\n", i, j);
+                return -1;
+            }
+        }
+    }
+
+    // Optionally print the grid for debugging
+    print_grid(rows, cols);
+
+    // Input starting point
+    printf("Enter the starting row and column: ");
+    if (scanf("%d %d", &startRow, &startCol) != 2 || startRow < 0 || startRow >= rows || startCol < 0 || startCol >= cols) {
+        printf("Invalid starting point coordinates.\n");
+        return -1;
+    }
+
+    // Input destination point
+    printf("Enter the destination row and column: ");
+    if (scanf("%d %d", &destRow, &destCol) != 2 || destRow < 0 || destRow >= rows || destCol < 0 || destCol >= cols) {
+        printf("Invalid destination point coordinates.\n");
+        return -1;
+    }
+
+    // Validate that start and destination are open cells
+    if (grid[startRow][startCol] == 1 || grid[destRow][destCol] == 1) {
+        printf("Invalid starting or destination point.\n");
+        return -1;
+    }
+
+    // Find the shortest path using BFS
+    int result = bfs(rows, cols, startRow, startCol, destRow, destCol);
+    if (result != -1)
+        printf("Shortest path length: %d\n", result);
+    else
+        printf("No path found.\n");
+
+    return 0;
+}
