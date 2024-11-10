@@ -81,6 +81,8 @@ void print_grid(int rows, int cols) {
 int main() {
     int rows, cols;
     int startRow, startCol, destRow, destCol;
+    
+    printf("<----------------Pathfinding Algo Using BFS in c--------------->\n");
 
     // Input grid dimensions
     printf("Enter the number of rows and columns for the grid: ");
@@ -130,5 +132,5 @@ int main() {
     else
         printf("No path found.\n");
 
-    return 0;
+return 0;
 }
